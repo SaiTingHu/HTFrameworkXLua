@@ -1,0 +1,14 @@
+{
+    "name": "HTFramework.XLua.RunTime",
+    "references": [
+        "HTFramework.RunTime"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
