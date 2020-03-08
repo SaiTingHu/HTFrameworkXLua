@@ -26,7 +26,7 @@ namespace CSObjectWrapEditor
 #if XLUA_GENERAL
         public static string common_path = "./Gen/";
 #else
-        public static string common_path = Application.dataPath + "/HTFrameworkXLua/RunTime/XLua/Gen/";
+        public static string common_path = Application.dataPath + "/XLua/Gen/";
 #endif
 
         static GeneratorConfig()

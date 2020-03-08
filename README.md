@@ -8,7 +8,7 @@
 
 - .NET API井云��4.x。
 
-- [XLua](https://github.com/Tencent/xLua)。
+- [XLua V2.1.14](https://github.com/Tencent/xLua)。
 
 - [HTFramework](https://github.com/SaiTingHu/HTFramework)。
 
