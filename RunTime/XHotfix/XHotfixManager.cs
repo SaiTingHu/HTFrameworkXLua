@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using UnityEngine;
 using XLua;
 
@@ -13,11 +14,18 @@ namespace HT.Framework.XLua
     {
         public static XHotfixManager Current;
 
+        public TextAsset MainLua;
+
         private LuaEnv _luaEnv = new LuaEnv();
         private LuaTable _luaTable;
         private float _lastGCTime = 0;
         private float _GCInterval = 1;
-        
+
+        private Action _luaOnAwake;
+        private Action _luaOnStart;
+        private Action _luaOnUpdate;
+        private Action _luaOnDestroy;
+
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);
@@ -31,10 +39,26 @@ namespace HT.Framework.XLua
             meta.Set("__index", _luaEnv.Global);
             _luaTable.SetMetaTable(meta);
             meta.Dispose();
+
+            DoString(MainLua.text, "Main", _luaTable);
+
+            _luaOnAwake = _luaTable.Get<Action>("OnAwake");
+            _luaOnStart = _luaTable.Get<Action>("OnStart");
+            _luaOnUpdate = _luaTable.Get<Action>("OnUpdate");
+            _luaOnDestroy = _luaTable.Get<Action>("OnDestroy");
+
+            _luaOnAwake?.Invoke();
+        }
+
+        private void Start()
+        {
+            _luaOnStart?.Invoke();
         }
 
         private void Update()
         {
+            _luaOnUpdate?.Invoke();
+
             if (Time.time - _lastGCTime > _GCInterval)
             {
                 _luaEnv.Tick();
@@ -44,10 +68,11 @@ namespace HT.Framework.XLua
 
         private void OnDestroy()
         {
-            _luaEnv.Dispose();
-            _luaEnv = null;
+            _luaOnDestroy?.Invoke();
+
             _luaTable.Dispose();
             _luaTable = null;
+            _luaEnv = null;
         }
 
         /// <summary>

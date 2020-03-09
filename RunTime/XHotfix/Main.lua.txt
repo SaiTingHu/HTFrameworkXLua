@@ -1,0 +1,15 @@
+function OnAwake()
+	print("Lua OnAwake...")
+end
+
+function OnStart()
+	print("Lua OnStart...")
+end
+
+function OnUpdate()
+	print("Lua OnUpdate...")
+end
+
+function OnDestroy()
+    print("Lua OnDestroy...")
+end

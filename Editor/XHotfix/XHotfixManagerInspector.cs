@@ -7,6 +7,17 @@ namespace HT.Framework.XLua
     [CustomEditor(typeof(XHotfixManager))]
     internal sealed class XHotfixManagerInspector : HTFEditor<XHotfixManager>
     {
-        
+        protected override bool IsEnableBaseInspectorGUI
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        protected override void OnInspectorDefaultGUI()
+        {
+            base.OnInspectorDefaultGUI();
+        }
     }
 }
