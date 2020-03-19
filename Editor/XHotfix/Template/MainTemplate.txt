@@ -1,0 +1,17 @@
+--require 'your lua script name'
+
+function OnInitialization()
+	print("Lua OnInitialization...")
+end
+
+function OnPreparatory()
+	print("Lua OnPreparatory...")
+end
+
+function OnRefresh()
+	print("Lua OnRefresh...")
+end
+
+function OnTermination()
+    print("Lua OnTermination...")
+end

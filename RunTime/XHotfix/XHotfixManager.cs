@@ -1,7 +1,10 @@
 ﻿using System;
-using System.Text;
+using System.Collections.Generic;
 using UnityEngine;
 using XLua;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace HT.Framework.XLua
 {
@@ -14,17 +17,36 @@ namespace HT.Framework.XLua
     {
         public static XHotfixManager Current;
 
-        public TextAsset MainLua;
+        /// <summary>
+        /// 自动启动
+        /// </summary>
+        public bool IsAutoStartUp = false;
+        /// <summary>
+        /// 热更新代码文件AB包名称
+        /// </summary>
+        public string HotfixCodeAssetBundleName = "xhotfix";
+        /// <summary>
+        /// 热更新代码文件主路径
+        /// </summary>
+        public string HotfixCodeAssetsPath = "Assets/XHotfix/";
+        /// <summary>
+        /// 热更新代码主模块
+        /// </summary>
+        public string HotfixCodeMain = "Main";
+        /// <summary>
+        /// XLua的Tick间隔时间
+        /// </summary>
+        public float TickInterval = 1;
 
-        private LuaEnv _luaEnv = new LuaEnv();
+        private bool _isStartUp = false;
+        private LuaEnv _luaEnv;
         private LuaTable _luaTable;
         private float _lastGCTime = 0;
-        private float _GCInterval = 1;
-
-        private Action _luaOnAwake;
-        private Action _luaOnStart;
-        private Action _luaOnUpdate;
-        private Action _luaOnDestroy;
+        private Action _luaOnInitialization;
+        private Action _luaOnPreparatory;
+        private Action _luaOnRefresh;
+        private Action _luaOnTermination;
+        private Dictionary<string, TextAsset> _luaCodes = new Dictionary<string, TextAsset>();
 
         private void Awake()
         {
@@ -32,34 +54,35 @@ namespace HT.Framework.XLua
 
             Current = this;
 
+            _luaEnv = new LuaEnv();
+            _luaEnv.AddLoader(XHotfixLoader);
             _luaTable = _luaEnv.NewTable();
-
-            // 为每个脚本设置一个独立的环境，可一定程度上防止脚本间全局变量、函数冲突
+            
             LuaTable meta = _luaEnv.NewTable();
             meta.Set("__index", _luaEnv.Global);
             _luaTable.SetMetaTable(meta);
             meta.Dispose();
 
-            DoString(MainLua.text, "Main", _luaTable);
-
-            _luaOnAwake = _luaTable.Get<Action>("OnAwake");
-            _luaOnStart = _luaTable.Get<Action>("OnStart");
-            _luaOnUpdate = _luaTable.Get<Action>("OnUpdate");
-            _luaOnDestroy = _luaTable.Get<Action>("OnDestroy");
-
-            _luaOnAwake?.Invoke();
+            if (Main.m_Resource.LoadMode == ResourceLoadMode.Resource)
+            {
+                GlobalTools.LogError("热更新初始化失败：热更新代码不支持使用Resource加载模式！");
+                return;
+            }
         }
 
         private void Start()
         {
-            _luaOnStart?.Invoke();
+            if (IsAutoStartUp)
+            {
+                StartUp();
+            }
         }
 
         private void Update()
         {
-            _luaOnUpdate?.Invoke();
+            _luaOnRefresh?.Invoke();
 
-            if (Time.time - _lastGCTime > _GCInterval)
+            if (Time.time - _lastGCTime > TickInterval)
             {
                 _luaEnv.Tick();
                 _lastGCTime = Time.time;
@@ -68,7 +91,7 @@ namespace HT.Framework.XLua
 
         private void OnDestroy()
         {
-            _luaOnDestroy?.Invoke();
+            _luaOnTermination?.Invoke();
 
             _luaTable.Dispose();
             _luaTable = null;
@@ -76,16 +99,99 @@ namespace HT.Framework.XLua
         }
 
         /// <summary>
-        /// 执行Lua代码
+        /// 启动热更新
         /// </summary>
-        /// <param name="luaCode">Lua代码字符串</param>
-        /// <param name="chunkName">发生error时的debug显示信息中使用，指明某某代码块的某行错误</param>
-        /// <param name="env">环境变量</param>
-        /// <returns>Lua代码的返回值</returns>
-        public object[] DoString(string luaCode, string chunkName = "chunk", LuaTable env = null)
+        public void StartUp()
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(luaCode);
-            return _luaEnv.DoString(bytes, chunkName, env);
+            if (!_isStartUp)
+            {
+                _isStartUp = true;
+                AssetInfo codeInfo = new AssetInfo(HotfixCodeAssetBundleName, HotfixCodeAssetsPath + HotfixCodeMain + ".lua.txt", "");
+                Main.m_Resource.LoadAsset<TextAsset>(codeInfo, null, HotfixCodeMainLoadDone);
+            }
+        }
+
+        private void HotfixCodeMainLoadDone(TextAsset asset)
+        {
+            if (asset)
+            {
+                _isStartUp = true;
+                _luaCodes.Clear();
+
+#if UNITY_EDITOR
+                string assetsPath = HotfixCodeAssetsPath;
+                if (assetsPath.EndsWith("/"))
+                {
+                    assetsPath = assetsPath.Substring(0, assetsPath.LastIndexOf("/"));
+                }
+                DefaultAsset defaultAsset = AssetDatabase.LoadAssetAtPath<DefaultAsset>(assetsPath);
+                if (defaultAsset)
+                {
+                    Selection.activeObject = defaultAsset;
+                    TextAsset[] textAssets = Selection.GetFiltered<TextAsset>(SelectionMode.DeepAssets);
+                    Selection.activeObject = null;
+                    for (int i = 0; i < textAssets.Length; i++)
+                    {
+                        _luaCodes.Add(textAssets[i].name, textAssets[i]);
+                    }
+
+                    StartUpXLua();
+                }
+                else
+                {
+                    _isStartUp = false;
+                    GlobalTools.LogError("热更新初始化失败：当前未创建热更新环境！");
+                }
+#else
+                AssetBundle assetBundle = Main.m_Resource.GetAssetBundle(HotfixCodeAssetBundleName);
+                if (assetBundle)
+                {
+                    TextAsset[] textAssets = assetBundle.LoadAllAssets<TextAsset>();
+                    for (int i = 0; i < textAssets.Length; i++)
+                    {
+                        _luaCodes.Add(textAssets[i].name, textAssets[i]);
+                    }
+
+                    StartUpXLua();
+                }
+                else
+                {
+                    _isStartUp = false;
+                    GlobalTools.LogError("热更新初始化失败：未拉取到热更新代码所属的AB包，或已提前释放该资源包！");
+                }
+#endif
+            }
+            else
+            {
+                _isStartUp = false;
+                GlobalTools.LogError("热更新初始化失败：未拉取到热更新代码主模块 " + HotfixCodeMain + "！");
+            }
+        }
+
+        private void StartUpXLua()
+        {
+            _luaEnv.DoString("require '" + HotfixCodeMain + "'", HotfixCodeMain, _luaTable);
+            
+            _luaOnInitialization = _luaTable.Get<Action>("OnInitialization");
+            _luaOnPreparatory = _luaTable.Get<Action>("OnPreparatory");
+            _luaOnRefresh = _luaTable.Get<Action>("OnRefresh");
+            _luaOnTermination = _luaTable.Get<Action>("OnTermination");
+
+            _luaOnInitialization?.Invoke();
+            _luaOnPreparatory?.Invoke();
+        }
+
+        private byte[] XHotfixLoader(ref string chunkName)
+        {
+            string fileName = chunkName + ".lua";
+            if (_luaCodes.ContainsKey(fileName))
+            {
+                return _luaCodes[fileName].bytes;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
