@@ -1,5 +1,9 @@
 --require 'your lua script name'
 
+Main = CS.HT.Framework.Main
+GameObject = CS.UnityEngine.GameObject
+Transform = CS.UnityEngine.Transform
+
 function OnInitialization()
 	print("Lua OnInitialization...")
 end
@@ -10,6 +14,10 @@ end
 
 function OnRefresh()
 	print("Lua OnRefresh...")
+end
+
+function OnRefreshSecond()
+	print("Lua OnRefreshSecond...")
 end
 
 function OnTermination()

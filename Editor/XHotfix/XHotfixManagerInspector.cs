@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEditor;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 namespace HT.Framework.XLua
 {
-    [CSDNBlogURL("")]
+    [CSDNBlogURL("https://wanderer.blog.csdn.net/article/details/104993852")]
     [GithubURL("https://github.com/SaiTingHu/HTFrameworkXLua")]
     [CustomEditor(typeof(XHotfixManager))]
     internal sealed class XHotfixManagerInspector : HTFEditor<XHotfixManager>
@@ -19,7 +20,7 @@ namespace HT.Framework.XLua
             base.OnDefaultEnable();
 
             _hotfixIsCreated = false;
-            string hotfixDirectory = Application.dataPath + Target.HotfixCodeAssetsPath.Replace("Assets", "");
+            string hotfixDirectory = Application.dataPath + Target.HotfixCodeAssetsPath.Replace("Assets", "") + "/";
             string hotfixMainPath = hotfixDirectory + Target.HotfixCodeMain + ".lua.txt";
             if (Directory.Exists(hotfixDirectory))
             {
@@ -34,7 +35,15 @@ namespace HT.Framework.XLua
         {
             base.OnRuntimeEnable();
 
-            _luaCodes = Target.GetType().GetField("_luaCodes", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(Target) as Dictionary<string, TextAsset>;
+            object value = Target.GetType().GetField("_loader", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(Target);
+            if (value != null)
+            {
+                _luaCodes = value.GetType().GetField("_luaCodes", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(value) as Dictionary<string, TextAsset>;
+            }
+            else
+            {
+                _luaCodes = new Dictionary<string, TextAsset>();
+            }
         }
 
         protected override void OnInspectorDefaultGUI()
@@ -45,17 +54,46 @@ namespace HT.Framework.XLua
             EditorGUILayout.HelpBox("XHotfix manager, this module encapsulated using XLua!", MessageType.Info);
             GUILayout.EndHorizontal();
 
-            #region XHotfixCode
             GUILayout.BeginVertical("box");
 
+            #region XHotfixProperty
             GUILayout.BeginHorizontal();
-            Toggle(Target.IsAutoStartUp, out Target.IsAutoStartUp, "Auto StartUp");
+            GUILayout.Label("Loader Type", GUILayout.Width(100));
+            if (GUILayout.Button(Target.XHotfixLoaderType, EditorGlobalTools.Styles.MiniPopup))
+            {
+                GenericMenu gm = new GenericMenu();
+                List<Type> types = GlobalTools.GetTypesInRunTimeAssemblies();
+                for (int i = 0; i < types.Count; i++)
+                {
+                    if (types[i].IsSubclassOf(typeof(XHotfixLoaderBase)))
+                    {
+                        int j = i;
+                        gm.AddItem(new GUIContent(types[j].FullName), Target.XHotfixLoaderType == types[j].FullName, () =>
+                        {
+                            Undo.RecordObject(target, "Set XHotfixLoader");
+                            Target.XHotfixLoaderType = types[j].FullName;
+                            HasChanged();
+                        });
+                    }
+                }
+                gm.ShowAsContext();
+            }
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            FloatField(Target.TickInterval, out Target.TickInterval, "Tick Interval");
+            GUILayout.Label("Auto StartUp", GUILayout.Width(100));
+            Toggle(Target.IsAutoStartUp, out Target.IsAutoStartUp, "");
             GUILayout.EndHorizontal();
 
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Tick Interval", GUILayout.Width(100));
+            FloatField(Target.TickInterval, out Target.TickInterval, "");
+            GUILayout.EndHorizontal();
+            #endregion
+            
+            GUILayout.Space(10);
+
+            #region XHotfixAssetBundle
             GUILayout.BeginHorizontal();
             GUILayout.Label("XHotfixCode AssetBundleName");
             GUILayout.EndHorizontal();
@@ -79,9 +117,9 @@ namespace HT.Framework.XLua
             GUILayout.BeginHorizontal();
             TextField(Target.HotfixCodeMain, out Target.HotfixCodeMain, "");
             GUILayout.EndHorizontal();
+            #endregion
 
             GUILayout.EndVertical();
-            #endregion
 
             #region XHotfixWizard
             if (_hotfixIsCreated)
@@ -108,7 +146,7 @@ namespace HT.Framework.XLua
             base.OnInspectorRuntimeGUI();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Lua Codes: ", GUILayout.Width(100));
+            GUILayout.Label("Loaded Lua Codes: ", GUILayout.Width(160));
             GUILayout.Label(_luaCodes.Count.ToString());
             GUILayout.EndHorizontal();
 
@@ -128,7 +166,7 @@ namespace HT.Framework.XLua
 
         private void CreateXHotfixEnvironment()
         {
-            string hotfixDirectory = Application.dataPath + Target.HotfixCodeAssetsPath.Replace("Assets", "");
+            string hotfixDirectory = Application.dataPath + Target.HotfixCodeAssetsPath.Replace("Assets", "") + "/";
             string hotfixMainPath = hotfixDirectory + Target.HotfixCodeMain + ".lua.txt";
             if (!Directory.Exists(hotfixDirectory))
             {

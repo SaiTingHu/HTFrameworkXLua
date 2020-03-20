@@ -43,4 +43,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b059d3c17844a54facfa7ee4f00cb8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MainLua: {fileID: 4900000, guid: ff3ac3f78a824fc43ba39d0ee2af947f, type: 3}
+  IsAutoStartUp: 1
+  HotfixCodeAssetBundleName: xhotfix
+  HotfixCodeAssetsPath: Assets/XHotfix
+  HotfixCodeMain: Main
+  TickInterval: 1

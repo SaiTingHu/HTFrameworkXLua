@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using XLua;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace HT.Framework.XLua
 {
@@ -18,9 +14,13 @@ namespace HT.Framework.XLua
         public static XHotfixManager Current;
 
         /// <summary>
+        /// 当前的XLua加载器类型
+        /// </summary>
+        public string XHotfixLoaderType = "HT.Framework.XLua.XHotfixDefaultLoader";
+        /// <summary>
         /// 自动启动
         /// </summary>
-        public bool IsAutoStartUp = false;
+        public bool IsAutoStartUp = true;
         /// <summary>
         /// 热更新代码文件AB包名称
         /// </summary>
@@ -28,7 +28,7 @@ namespace HT.Framework.XLua
         /// <summary>
         /// 热更新代码文件主路径
         /// </summary>
-        public string HotfixCodeAssetsPath = "Assets/XHotfix/";
+        public string HotfixCodeAssetsPath = "Assets/XHotfix";
         /// <summary>
         /// 热更新代码主模块
         /// </summary>
@@ -39,14 +39,16 @@ namespace HT.Framework.XLua
         public float TickInterval = 1;
 
         private bool _isStartUp = false;
+        private float _lastGCTime = 0;
+        private float _timer = 0;
+        private XHotfixLoaderBase _loader;
         private LuaEnv _luaEnv;
         private LuaTable _luaTable;
-        private float _lastGCTime = 0;
         private Action _luaOnInitialization;
         private Action _luaOnPreparatory;
         private Action _luaOnRefresh;
+        private Action _luaOnRefreshSecond;
         private Action _luaOnTermination;
-        private Dictionary<string, TextAsset> _luaCodes = new Dictionary<string, TextAsset>();
 
         private void Awake()
         {
@@ -54,8 +56,25 @@ namespace HT.Framework.XLua
 
             Current = this;
 
+            Type type = GlobalTools.GetTypeInRunTimeAssemblies(XHotfixLoaderType);
+            if (type != null)
+            {
+                if (type.IsSubclassOf(typeof(XHotfixLoaderBase)))
+                {
+                    _loader = Activator.CreateInstance(type) as XHotfixLoaderBase;
+                }
+                else
+                {
+                    GlobalTools.LogError("创建XLua加载器失败：XLua加载器类 " + XHotfixLoaderType + " 必须继承至加载器基类：XHotfixLoaderBase！");
+                }
+            }
+            else
+            {
+                GlobalTools.LogError("创建XLua加载器失败：丢失XLua加载器类 " + XHotfixLoaderType + "！");
+            }
+
             _luaEnv = new LuaEnv();
-            _luaEnv.AddLoader(XHotfixLoader);
+            _luaEnv.AddLoader(_loader.OnLoadRequire);
             _luaTable = _luaEnv.NewTable();
             
             LuaTable meta = _luaEnv.NewTable();
@@ -82,6 +101,16 @@ namespace HT.Framework.XLua
         {
             _luaOnRefresh?.Invoke();
 
+            if (_timer < 1)
+            {
+                _timer += Time.deltaTime;
+            }
+            else
+            {
+                _timer = 0;
+                _luaOnRefreshSecond?.Invoke();
+            }
+
             if (Time.time - _lastGCTime > TickInterval)
             {
                 _luaEnv.Tick();
@@ -93,9 +122,40 @@ namespace HT.Framework.XLua
         {
             _luaOnTermination?.Invoke();
 
+            _luaOnInitialization = null;
+            _luaOnPreparatory = null;
+            _luaOnRefresh = null;
+            _luaOnRefreshSecond = null;
+            _luaOnTermination = null;
+
+            _loader.Dispose();
+            _loader = null;
+
             _luaTable.Dispose();
             _luaTable = null;
             _luaEnv = null;
+        }
+
+        /// <summary>
+        /// Lua虚拟机
+        /// </summary>
+        public LuaEnv LuaVM
+        {
+            get
+            {
+                return _luaEnv;
+            }
+        }
+
+        /// <summary>
+        /// Lua全局环境
+        /// </summary>
+        public LuaTable LuaGlobal
+        {
+            get
+            {
+                return _luaEnv.Global;
+            }
         }
 
         /// <summary>
@@ -106,58 +166,49 @@ namespace HT.Framework.XLua
             if (!_isStartUp)
             {
                 _isStartUp = true;
-                AssetInfo codeInfo = new AssetInfo(HotfixCodeAssetBundleName, HotfixCodeAssetsPath + HotfixCodeMain + ".lua.txt", "");
+                AssetInfo codeInfo = new AssetInfo(HotfixCodeAssetBundleName, HotfixCodeAssetsPath + "/" + HotfixCodeMain + ".lua.txt", "");
                 Main.m_Resource.LoadAsset<TextAsset>(codeInfo, null, HotfixCodeMainLoadDone);
             }
+        }
+
+        /// <summary>
+        /// 获取Lua全局对象（字段、表、方法）
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="key">名称</param>
+        /// <returns>对象</returns>
+        public T Get<T>(string key)
+        {
+            return LuaGlobal.Get<T>(key);
+        }
+
+        /// <summary>
+        /// 设置Lua全局对象
+        /// </summary>
+        /// <typeparam name="TKey">键类型</typeparam>
+        /// <typeparam name="TValue">值类型</typeparam>
+        /// <param name="key">键</param>
+        /// <param name="value">值</param>
+        public void Set<TKey, TValue>(TKey key, TValue value)
+        {
+            LuaGlobal.Set(key, value);
         }
 
         private void HotfixCodeMainLoadDone(TextAsset asset)
         {
             if (asset)
             {
-                _isStartUp = true;
-                _luaCodes.Clear();
-
 #if UNITY_EDITOR
-                string assetsPath = HotfixCodeAssetsPath;
-                if (assetsPath.EndsWith("/"))
+                _isStartUp = _loader.OnLoadLuaCodeEditor(HotfixCodeAssetsPath);
+                if (_isStartUp)
                 {
-                    assetsPath = assetsPath.Substring(0, assetsPath.LastIndexOf("/"));
-                }
-                DefaultAsset defaultAsset = AssetDatabase.LoadAssetAtPath<DefaultAsset>(assetsPath);
-                if (defaultAsset)
-                {
-                    Selection.activeObject = defaultAsset;
-                    TextAsset[] textAssets = Selection.GetFiltered<TextAsset>(SelectionMode.DeepAssets);
-                    Selection.activeObject = null;
-                    for (int i = 0; i < textAssets.Length; i++)
-                    {
-                        _luaCodes.Add(textAssets[i].name, textAssets[i]);
-                    }
-
                     StartUpXLua();
-                }
-                else
-                {
-                    _isStartUp = false;
-                    GlobalTools.LogError("热更新初始化失败：当前未创建热更新环境！");
                 }
 #else
-                AssetBundle assetBundle = Main.m_Resource.GetAssetBundle(HotfixCodeAssetBundleName);
-                if (assetBundle)
+                _isStartUp = _loader.OnLoadLuaCode(HotfixCodeAssetBundleName);
+                if (_isStartUp)
                 {
-                    TextAsset[] textAssets = assetBundle.LoadAllAssets<TextAsset>();
-                    for (int i = 0; i < textAssets.Length; i++)
-                    {
-                        _luaCodes.Add(textAssets[i].name, textAssets[i]);
-                    }
-
                     StartUpXLua();
-                }
-                else
-                {
-                    _isStartUp = false;
-                    GlobalTools.LogError("热更新初始化失败：未拉取到热更新代码所属的AB包，或已提前释放该资源包！");
                 }
 #endif
             }
@@ -172,26 +223,14 @@ namespace HT.Framework.XLua
         {
             _luaEnv.DoString("require '" + HotfixCodeMain + "'", HotfixCodeMain, _luaTable);
             
-            _luaOnInitialization = _luaTable.Get<Action>("OnInitialization");
-            _luaOnPreparatory = _luaTable.Get<Action>("OnPreparatory");
-            _luaOnRefresh = _luaTable.Get<Action>("OnRefresh");
-            _luaOnTermination = _luaTable.Get<Action>("OnTermination");
+            _luaOnInitialization = LuaGlobal.Get<Action>("OnInitialization");
+            _luaOnPreparatory = LuaGlobal.Get<Action>("OnPreparatory");
+            _luaOnRefresh = LuaGlobal.Get<Action>("OnRefresh");
+            _luaOnRefreshSecond = LuaGlobal.Get<Action>("OnRefreshSecond");
+            _luaOnTermination = LuaGlobal.Get<Action>("OnTermination");
 
             _luaOnInitialization?.Invoke();
             _luaOnPreparatory?.Invoke();
-        }
-
-        private byte[] XHotfixLoader(ref string chunkName)
-        {
-            string fileName = chunkName + ".lua";
-            if (_luaCodes.ContainsKey(fileName))
-            {
-                return _luaCodes[fileName].bytes;
-            }
-            else
-            {
-                return null;
-            }
         }
     }
 }

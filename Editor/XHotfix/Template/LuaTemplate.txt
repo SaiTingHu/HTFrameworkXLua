@@ -12,6 +12,10 @@ function #MODULENAME#.OnRefresh()
 	print("Lua #MODULENAME#.OnRefresh...")
 end
 
+function #MODULENAME#.OnRefreshSecond()
+	print("Lua #MODULENAME#.OnRefreshSecond...")
+end
+
 function #MODULENAME#.OnTermination()
     print("Lua #MODULENAME#.OnTermination...")
 end
