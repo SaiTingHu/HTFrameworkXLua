@@ -91,5 +91,17 @@ namespace HT.Framework.XLua
             }
         }
         #endregion
+
+        #region 扩展工具
+        /// <summary>
+        /// 是否是Lua脚本
+        /// </summary>
+        /// <param name="textAsset">文本文件</param>
+        /// <returns>是否是Lua脚本</returns>
+        public static bool IsLuaScript(this TextAsset textAsset)
+        {
+            return textAsset.name.EndsWith(".lua");
+        }
+        #endregion
     }
 }
