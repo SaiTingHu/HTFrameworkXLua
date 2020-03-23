@@ -75,6 +75,16 @@ namespace HT.Framework.XLua
             }
         }
 
+        protected override void OnHeaderGUI()
+        {
+            base.OnHeaderGUI();
+
+            if (_isLuaScript)
+            {
+                GUI.Label(new Rect(45, 25, 65, 20), "Lua Script", "AssetLabel");
+            }
+        }
+
         private void OnLuaExplain()
         {
             _variables = new List<LuaVariable>();

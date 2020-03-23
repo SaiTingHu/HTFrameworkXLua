@@ -100,6 +100,12 @@ namespace HT.Framework.XLua
 
             GUILayout.BeginHorizontal();
             TextField(Target.HotfixCodeAssetBundleName, out Target.HotfixCodeAssetBundleName, "");
+            GUI.enabled = _hotfixIsCreated;
+            if (GUILayout.Button("Sign All", EditorStyles.miniButton, GUILayout.Width(60)))
+            {
+                SignLuaFolder(new DirectoryInfo(Application.dataPath + Target.HotfixCodeAssetsPath.Replace("Assets", "") + "/"));
+            }
+            GUI.enabled = true;
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -186,6 +192,32 @@ namespace HT.Framework.XLua
                 File.AppendAllText(filePath, code);
                 asset = null;
                 AssetDatabase.Refresh();
+            }
+        }
+        private void SignLuaFolder(DirectoryInfo directoryInfo)
+        {
+            FileSystemInfo[] fileSystemInfos = directoryInfo.GetFileSystemInfos();
+            for (int i = 0; i < fileSystemInfos.Length; i++)
+            {
+                if (fileSystemInfos[i] is FileInfo)
+                {
+                    SignLuaScript(fileSystemInfos[i] as FileInfo);
+                }
+                else if (fileSystemInfos[i] is DirectoryInfo)
+                {
+                    SignLuaFolder(fileSystemInfos[i] as DirectoryInfo);
+                }
+            }
+        }
+        private void SignLuaScript(FileInfo fileInfo)
+        {
+            if (fileInfo.FullName.EndsWith(".lua.txt"))
+            {
+                string path = fileInfo.FullName.Substring(fileInfo.FullName.IndexOf("Assets"));
+                AssetImporter importer = AssetImporter.GetAtPath(path);
+                importer.assetBundleName = Target.HotfixCodeAssetBundleName;
+                importer.SaveAndReimport();
+                GlobalTools.LogInfo("已标记 " + Target.HotfixCodeAssetBundleName + " 于 " + path);
             }
         }
     }
