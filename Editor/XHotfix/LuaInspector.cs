@@ -12,7 +12,7 @@ namespace HT.Framework.XLua
         private bool _isLuaScript = false;
         private List<LuaVariable> _variables;
         private List<LuaFunction> _functions;
-        private LuaShowType _showType = LuaShowType.Explain;
+        private LuaShowType _showType = LuaShowType.Parser;
         private Vector2 _scrollExplain;
         private Vector2 _scrollScript;
 
@@ -64,9 +64,9 @@ namespace HT.Framework.XLua
             {
                 OnTitleGUI();
 
-                if (_showType == LuaShowType.Explain)
+                if (_showType == LuaShowType.Parser)
                 {
-                    OnExplainGUI();
+                    OnParserGUI();
                 }
                 else
                 {
@@ -205,9 +205,9 @@ namespace HT.Framework.XLua
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if (GUILayout.Toggle(_showType == LuaShowType.Explain, "Lua Explain", "ButtonLeft", GUILayout.Width(100)))
+            if (GUILayout.Toggle(_showType == LuaShowType.Parser, "Lua Parser", "ButtonLeft", GUILayout.Width(100)))
             {
-                _showType = LuaShowType.Explain;
+                _showType = LuaShowType.Parser;
             }
             if (GUILayout.Toggle(_showType == LuaShowType.Script, "Lua Script", "ButtonRight", GUILayout.Width(100)))
             {
@@ -217,7 +217,7 @@ namespace HT.Framework.XLua
             EditorGUILayout.EndHorizontal();
         }
 
-        private void OnExplainGUI()
+        private void OnParserGUI()
         {
             GUILayout.BeginVertical();
             _scrollExplain = GUILayout.BeginScrollView(_scrollExplain);
@@ -307,7 +307,7 @@ namespace HT.Framework.XLua
 
         private enum LuaShowType
         {
-            Explain,
+            Parser,
             Script
         }
     }
