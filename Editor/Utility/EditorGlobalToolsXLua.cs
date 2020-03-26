@@ -1,14 +1,15 @@
 ﻿using CSObjectWrapEditor;
 using System.IO;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace HT.Framework.XLua
 {
     /// <summary>
-    /// 编辑器工具
+    /// HT.Framework.XLua编辑器全局工具
     /// </summary>
-    public static class XHotfixEditorTools
+    public static class EditorGlobalToolsXLua
     {
         #region GenPath
         [GenPath]
@@ -42,6 +43,39 @@ namespace HT.Framework.XLua
 
             ZipFile.DeCompress(Application.dataPath + "/HTFrameworkXLua/Editor/XLua/WebGLPlugins.zip", GlobalTools.GetDirectorySameLevelOfAssets(""), "", true);
             GlobalTools.LogInfo("已成功导入 XLua WebGLPlugins：" + path);
+        }
+        #endregion
+
+        #region 层级视图新建菜单
+        /// <summary>
+        /// 【验证函数】新建XLua主环境
+        /// </summary>
+        [@MenuItem("GameObject/HTFramework.XLua/XLua Environment", true)]
+        private static bool CreateXLuaValidate()
+        {
+            return Object.FindObjectOfType<XHotfixManager>() == null;
+        }
+        /// <summary>
+        /// 新建XLua主环境
+        /// </summary>
+        [@MenuItem("GameObject/HTFramework.XLua/XLua Environment", false, 0)]
+        private static void CreateXLua()
+        {
+            Object asset = AssetDatabase.LoadAssetAtPath<Object>("Assets/HTFrameworkXLua/HTFrameworkXLua.prefab");
+            if (asset)
+            {
+                GameObject main = PrefabUtility.InstantiatePrefab(asset) as GameObject;
+                main.name = "HTFrameworkXLua";
+                main.transform.localPosition = Vector3.zero;
+                main.transform.localRotation = Quaternion.identity;
+                main.transform.localScale = Vector3.one;
+                Selection.activeGameObject = main;
+                EditorSceneManager.MarkSceneDirty(main.scene);
+            }
+            else
+            {
+                GlobalTools.LogError("新建XLua主环境失败，丢失主预制体：Assets/HTFrameworkXLua/HTFrameworkXLua.prefab");
+            }
         }
         #endregion
 
