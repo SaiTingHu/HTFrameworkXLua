@@ -56,7 +56,7 @@ namespace HT.Framework.XLua
 
             Current = this;
 
-            Type type = GlobalTools.GetTypeInRunTimeAssemblies(XHotfixLoaderType);
+            Type type = ReflectionToolkit.GetTypeInRunTimeAssemblies(XHotfixLoaderType);
             if (type != null)
             {
                 if (type.IsSubclassOf(typeof(XHotfixLoaderBase)))
