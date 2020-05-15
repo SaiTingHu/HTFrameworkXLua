@@ -62,19 +62,19 @@ namespace HT.Framework.XLua
             if (GUILayout.Button(Target.XHotfixLoaderType, EditorGlobalTools.Styles.MiniPopup))
             {
                 GenericMenu gm = new GenericMenu();
-                List<Type> types = ReflectionToolkit.GetTypesInRunTimeAssemblies();
+                List<Type> types = ReflectionToolkit.GetTypesInRunTimeAssemblies(type =>
+                {
+                    return type.IsSubclassOf(typeof(XHotfixLoaderBase));
+                });
                 for (int i = 0; i < types.Count; i++)
                 {
-                    if (types[i].IsSubclassOf(typeof(XHotfixLoaderBase)))
+                    int j = i;
+                    gm.AddItem(new GUIContent(types[j].FullName), Target.XHotfixLoaderType == types[j].FullName, () =>
                     {
-                        int j = i;
-                        gm.AddItem(new GUIContent(types[j].FullName), Target.XHotfixLoaderType == types[j].FullName, () =>
-                        {
-                            Undo.RecordObject(target, "Set XHotfixLoader");
-                            Target.XHotfixLoaderType = types[j].FullName;
-                            HasChanged();
-                        });
-                    }
+                        Undo.RecordObject(target, "Set XHotfixLoader");
+                        Target.XHotfixLoaderType = types[j].FullName;
+                        HasChanged();
+                    });
                 }
                 gm.ShowAsContext();
             }
