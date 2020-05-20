@@ -23,12 +23,12 @@ namespace HT.Framework.XLua
             string path = GlobalTools.GetDirectorySameLevelOfAssets("/Tools");
             if (Directory.Exists(path))
             {
-                GlobalTools.LogWarning("已存在 XLua Tools：" + path);
+                Log.Warning("已存在 XLua Tools：" + path);
                 return;
             }
 
             ZipFile.DeCompress(Application.dataPath + "/HTFrameworkXLua/Editor/XLua/Tools.zip", GlobalTools.GetDirectorySameLevelOfAssets(""), "", true);
-            GlobalTools.LogInfo("已成功导入 XLua Tools：" + path);
+            Log.Info("已成功导入 XLua Tools：" + path);
         }
 
         [MenuItem("XLua/Import XLua WebGLPlugins")]
@@ -37,12 +37,12 @@ namespace HT.Framework.XLua
             string path = GlobalTools.GetDirectorySameLevelOfAssets("/WebGLPlugins");
             if (Directory.Exists(path))
             {
-                GlobalTools.LogWarning("已存在 XLua WebGLPlugins：" + path);
+                Log.Warning("已存在 XLua WebGLPlugins：" + path);
                 return;
             }
 
             ZipFile.DeCompress(Application.dataPath + "/HTFrameworkXLua/Editor/XLua/WebGLPlugins.zip", GlobalTools.GetDirectorySameLevelOfAssets(""), "", true);
-            GlobalTools.LogInfo("已成功导入 XLua WebGLPlugins：" + path);
+            Log.Info("已成功导入 XLua WebGLPlugins：" + path);
         }
         #endregion
 
@@ -74,7 +74,7 @@ namespace HT.Framework.XLua
             }
             else
             {
-                GlobalTools.LogError("新建XLua主环境失败，丢失主预制体：Assets/HTFrameworkXLua/HTFrameworkXLua.prefab");
+                Log.Error("新建XLua主环境失败，丢失主预制体：Assets/HTFrameworkXLua/HTFrameworkXLua.prefab");
             }
         }
         #endregion
@@ -120,7 +120,7 @@ namespace HT.Framework.XLua
                 }
                 else
                 {
-                    GlobalTools.LogError("新建Lua失败，已存在同名脚本 " + className);
+                    Log.Error("新建Lua失败，已存在同名脚本 " + className);
                 }
             }
         }

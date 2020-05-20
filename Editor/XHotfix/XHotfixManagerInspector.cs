@@ -217,7 +217,7 @@ namespace HT.Framework.XLua
                 AssetImporter importer = AssetImporter.GetAtPath(path);
                 importer.assetBundleName = Target.HotfixCodeAssetBundleName;
                 importer.SaveAndReimport();
-                GlobalTools.LogInfo("已标记 " + Target.HotfixCodeAssetBundleName + " 于 " + path);
+                Log.Info("已标记 " + Target.HotfixCodeAssetBundleName + " 于 " + path);
             }
         }
     }

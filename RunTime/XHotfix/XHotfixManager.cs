@@ -65,12 +65,12 @@ namespace HT.Framework.XLua
                 }
                 else
                 {
-                    GlobalTools.LogError("创建XLua加载器失败：XLua加载器类 " + XHotfixLoaderType + " 必须继承至加载器基类：XHotfixLoaderBase！");
+                    Log.Error("创建XLua加载器失败：XLua加载器类 " + XHotfixLoaderType + " 必须继承至加载器基类：XHotfixLoaderBase！");
                 }
             }
             else
             {
-                GlobalTools.LogError("创建XLua加载器失败：丢失XLua加载器类 " + XHotfixLoaderType + "！");
+                Log.Error("创建XLua加载器失败：丢失XLua加载器类 " + XHotfixLoaderType + "！");
             }
 
             _luaEnv = new LuaEnv();
@@ -84,7 +84,7 @@ namespace HT.Framework.XLua
 
             if (Main.m_Resource.LoadMode == ResourceLoadMode.Resource)
             {
-                GlobalTools.LogError("热更新初始化失败：热更新代码不支持使用Resource加载模式！");
+                Log.Error("热更新初始化失败：热更新代码不支持使用Resource加载模式！");
                 return;
             }
         }
@@ -215,7 +215,7 @@ namespace HT.Framework.XLua
             else
             {
                 _isStartUp = false;
-                GlobalTools.LogError("热更新初始化失败：未拉取到热更新代码主模块 " + HotfixCodeMain + "！");
+                Log.Error("热更新初始化失败：未拉取到热更新代码主模块 " + HotfixCodeMain + "！");
             }
         }
 

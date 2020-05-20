@@ -28,7 +28,7 @@ namespace HT.Framework.XLua
                         {
                             string path1 = AssetDatabase.GetAssetPath(_luaCodes[textAssets[i].name]);
                             string path2 = AssetDatabase.GetAssetPath(textAssets[i]);
-                            GlobalTools.LogError("加载Lua脚本失败：发现同名脚本 " + path1 + " 和 " + path2);
+                            Log.Error("加载Lua脚本失败：发现同名脚本 " + path1 + " 和 " + path2);
                         }
                         else
                         {
@@ -40,7 +40,7 @@ namespace HT.Framework.XLua
             }
             else
             {
-                GlobalTools.LogError("热更新初始化失败：当前未创建热更新环境！");
+                Log.Error("热更新初始化失败：当前未创建热更新环境！");
                 return false;
             }
         }
@@ -57,7 +57,7 @@ namespace HT.Framework.XLua
                     {
                         if (_luaCodes.ContainsKey(textAssets[i].name))
                         {
-                            GlobalTools.LogError("加载Lua脚本失败：发现同名脚本 " + textAssets[i].name);
+                            Log.Error("加载Lua脚本失败：发现同名脚本 " + textAssets[i].name);
                         }
                         else
                         {
@@ -69,7 +69,7 @@ namespace HT.Framework.XLua
             }
             else
             {
-                GlobalTools.LogError("热更新初始化失败：未拉取到热更新代码所属的AB包，或已提前释放该资源包！");
+                Log.Error("热更新初始化失败：未拉取到热更新代码所属的AB包，或已提前释放该资源包！");
                 return false;
             }
         }

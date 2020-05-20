@@ -16,7 +16,7 @@ namespace HT.Framework.XLua
         {
             if (!Directory.Exists(folderPath))
             {
-                GlobalTools.LogError("压缩文件夹失败：" + folderPath + " 不是有效的文件夹路径！");
+                Log.Error("压缩文件夹失败：" + folderPath + " 不是有效的文件夹路径！");
                 return;
             }
 
