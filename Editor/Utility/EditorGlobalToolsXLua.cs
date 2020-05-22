@@ -50,7 +50,7 @@ namespace HT.Framework.XLua
         /// <summary>
         /// 【验证函数】新建XLua主环境
         /// </summary>
-        [@MenuItem("GameObject/HTFramework.XLua/XLua Environment", true)]
+        [@MenuItem("GameObject/HTFramework XLua/XLua Environment", true)]
         private static bool CreateXLuaValidate()
         {
             return Object.FindObjectOfType<XHotfixManager>() == null;
@@ -58,7 +58,7 @@ namespace HT.Framework.XLua
         /// <summary>
         /// 新建XLua主环境
         /// </summary>
-        [@MenuItem("GameObject/HTFramework.XLua/XLua Environment", false, 0)]
+        [@MenuItem("GameObject/HTFramework XLua/XLua Environment", false, 0)]
         private static void CreateXLua()
         {
             Object asset = AssetDatabase.LoadAssetAtPath<Object>("Assets/HTFrameworkXLua/HTFrameworkXLua.prefab");

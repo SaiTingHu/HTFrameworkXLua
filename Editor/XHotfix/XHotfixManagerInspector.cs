@@ -101,9 +101,9 @@ namespace HT.Framework.XLua
             GUILayout.BeginHorizontal();
             TextField(Target.HotfixCodeAssetBundleName, out Target.HotfixCodeAssetBundleName, "");
             GUI.enabled = _hotfixIsCreated;
-            if (GUILayout.Button("Sign All", EditorStyles.miniButton, GUILayout.Width(60)))
+            if (GUILayout.Button("Mark All", EditorStyles.miniButton, GUILayout.Width(60)))
             {
-                SignLuaFolder(new DirectoryInfo(Application.dataPath + Target.HotfixCodeAssetsPath.Replace("Assets", "") + "/"));
+                MarkLuaFolder(new DirectoryInfo(Application.dataPath + Target.HotfixCodeAssetsPath.Replace("Assets", "") + "/"));
             }
             GUI.enabled = true;
             GUILayout.EndHorizontal();
@@ -194,22 +194,22 @@ namespace HT.Framework.XLua
                 AssetDatabase.Refresh();
             }
         }
-        private void SignLuaFolder(DirectoryInfo directoryInfo)
+        private void MarkLuaFolder(DirectoryInfo directoryInfo)
         {
             FileSystemInfo[] fileSystemInfos = directoryInfo.GetFileSystemInfos();
             for (int i = 0; i < fileSystemInfos.Length; i++)
             {
                 if (fileSystemInfos[i] is FileInfo)
                 {
-                    SignLuaScript(fileSystemInfos[i] as FileInfo);
+                    MarkLuaScript(fileSystemInfos[i] as FileInfo);
                 }
                 else if (fileSystemInfos[i] is DirectoryInfo)
                 {
-                    SignLuaFolder(fileSystemInfos[i] as DirectoryInfo);
+                    MarkLuaFolder(fileSystemInfos[i] as DirectoryInfo);
                 }
             }
         }
-        private void SignLuaScript(FileInfo fileInfo)
+        private void MarkLuaScript(FileInfo fileInfo)
         {
             if (fileInfo.FullName.EndsWith(".lua.txt"))
             {
