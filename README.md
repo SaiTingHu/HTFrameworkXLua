@@ -10,7 +10,7 @@
 
 - [XLua V2.1.14](https://github.com/Tencent/xLua)¡£
 
-- [HTFramework](https://github.com/SaiTingHu/HTFramework)¡£
+- [HTFramework(Latest version)](https://github.com/SaiTingHu/HTFramework)¡£
 
 ## Ä£¿é¼ò½é
 
