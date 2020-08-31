@@ -112,7 +112,7 @@ namespace HT.Framework.XLua
                         int j = i + 1;
                         for (; j < codes.Length; j++)
                         {
-                            if (codes[j].StartsWith(_noteEnd))
+                            if (codes[j].EndsWith(_noteEnd))
                             {
                                 break;
                             }
