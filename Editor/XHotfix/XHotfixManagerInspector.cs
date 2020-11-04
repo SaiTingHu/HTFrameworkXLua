@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace HT.Framework.XLua
 {
+    [GiteeURL("https://gitee.com/SaiTingHu/HTFrameworkXLua")]
     [CSDNBlogURL("https://wanderer.blog.csdn.net/article/details/104993852")]
     [GithubURL("https://github.com/SaiTingHu/HTFrameworkXLua")]
     [CustomEditor(typeof(XHotfixManager))]
