@@ -52,8 +52,6 @@ namespace HT.Framework.XLua
 
         private void Awake()
         {
-            DontDestroyOnLoad(gameObject);
-
             Current = this;
 
             Type type = ReflectionToolkit.GetTypeInRunTimeAssemblies(XHotfixLoaderType);
