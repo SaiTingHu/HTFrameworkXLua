@@ -9,7 +9,7 @@ namespace HT.Framework.XLua
     /// </summary>
     [DisallowMultipleComponent]
     [DefaultExecutionOrder(-10)]
-    public sealed class XHotfixManager : MonoBehaviour
+    public sealed class XHotfixManager : HTBehaviour
     {
         public static XHotfixManager Current;
 
@@ -50,8 +50,10 @@ namespace HT.Framework.XLua
         private Action _luaOnRefreshSecond;
         private Action _luaOnTermination;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             Current = this;
 
             Type type = ReflectionToolkit.GetTypeInRunTimeAssemblies(XHotfixLoaderType);
