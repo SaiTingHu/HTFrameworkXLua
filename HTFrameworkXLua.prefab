@@ -43,6 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b059d3c17844a54facfa7ee4f00cb8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  XHotfixLoaderType: HT.Framework.XLua.XHotfixDefaultLoader
   IsAutoStartUp: 1
   HotfixCodeAssetBundleName: xhotfix
   HotfixCodeAssetsPath: Assets/XHotfix
