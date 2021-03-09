@@ -9,10 +9,8 @@ namespace HT.Framework.XLua
     /// </summary>
     [DisallowMultipleComponent]
     [DefaultExecutionOrder(-10)]
-    public sealed class XHotfixManager : HTBehaviour
+    public sealed class XHotfixManager : SingletonBehaviourBase<XHotfixManager>
     {
-        public static XHotfixManager Current;
-
         /// <summary>
         /// 当前的XLua加载器类型
         /// </summary>
@@ -53,9 +51,7 @@ namespace HT.Framework.XLua
         protected override void Awake()
         {
             base.Awake();
-
-            Current = this;
-
+            
             Type type = ReflectionToolkit.GetTypeInRunTimeAssemblies(XHotfixLoaderType);
             if (type != null)
             {
@@ -88,7 +84,6 @@ namespace HT.Framework.XLua
                 return;
             }
         }
-
         private void Start()
         {
             if (IsAutoStartUp)
@@ -96,7 +91,6 @@ namespace HT.Framework.XLua
                 StartUp();
             }
         }
-
         private void Update()
         {
             _luaOnRefresh?.Invoke();
@@ -117,9 +111,10 @@ namespace HT.Framework.XLua
                 _lastGCTime = Time.time;
             }
         }
-
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
+
             _luaOnTermination?.Invoke();
 
             _luaOnInitialization = null;
@@ -146,7 +141,6 @@ namespace HT.Framework.XLua
                 return _luaEnv;
             }
         }
-
         /// <summary>
         /// Lua全局环境
         /// </summary>
@@ -157,6 +151,10 @@ namespace HT.Framework.XLua
                 return _luaEnv.Global;
             }
         }
+        /// <summary>
+        /// Lua热更新逻辑是否运行中
+        /// </summary>
+        public bool IsRuning { get; private set; } = false;
 
         /// <summary>
         /// 启动热更新
@@ -166,11 +164,11 @@ namespace HT.Framework.XLua
             if (!_isStartUp)
             {
                 _isStartUp = true;
+                IsRuning = false;
                 AssetInfo codeInfo = new AssetInfo(HotfixCodeAssetBundleName, HotfixCodeAssetsPath + "/" + HotfixCodeMain + ".lua.txt", "");
                 Main.m_Resource.LoadAsset<TextAsset>(codeInfo, null, HotfixCodeMainLoadDone);
             }
         }
-
         /// <summary>
         /// 获取Lua全局对象（字段、表、方法）
         /// </summary>
@@ -181,7 +179,6 @@ namespace HT.Framework.XLua
         {
             return LuaGlobal.Get<T>(key);
         }
-
         /// <summary>
         /// 设置Lua全局对象
         /// </summary>
@@ -204,11 +201,19 @@ namespace HT.Framework.XLua
                 {
                     StartUpXLua();
                 }
+                else
+                {
+                    Log.Error("热更新初始化失败：请查看错误描述！");
+                }
 #else
                 _isStartUp = _loader.OnLoadLuaCode(HotfixCodeAssetBundleName);
                 if (_isStartUp)
                 {
                     StartUpXLua();
+                }
+                else
+                {
+                    Log.Error("热更新初始化失败：请查看错误描述！");
                 }
 #endif
             }
@@ -218,7 +223,6 @@ namespace HT.Framework.XLua
                 Log.Error("热更新初始化失败：未拉取到热更新代码主模块 " + HotfixCodeMain + "！");
             }
         }
-
         private void StartUpXLua()
         {
             _luaEnv.DoString("require '" + HotfixCodeMain + "'", HotfixCodeMain, _luaTable);
@@ -231,6 +235,8 @@ namespace HT.Framework.XLua
 
             _luaOnInitialization?.Invoke();
             _luaOnPreparatory?.Invoke();
+
+            IsRuning = true;
         }
     }
 }

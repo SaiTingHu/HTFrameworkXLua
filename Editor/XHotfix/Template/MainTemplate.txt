@@ -1,4 +1,4 @@
---require 'your lua script name'
+﻿--require 'your lua script name'
 
 Main = CS.HT.Framework.Main
 GameObject = CS.UnityEngine.GameObject

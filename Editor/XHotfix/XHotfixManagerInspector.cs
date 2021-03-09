@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -31,7 +32,6 @@ namespace HT.Framework.XLua
                 }
             }
         }
-
         protected override void OnRuntimeEnable()
         {
             base.OnRuntimeEnable();
@@ -46,7 +46,6 @@ namespace HT.Framework.XLua
                 _luaCodes = new Dictionary<string, TextAsset>();
             }
         }
-
         protected override void OnInspectorDefaultGUI()
         {
             base.OnInspectorDefaultGUI();
@@ -147,7 +146,6 @@ namespace HT.Framework.XLua
             }
             #endregion
         }
-
         protected override void OnInspectorRuntimeGUI()
         {
             base.OnInspectorRuntimeGUI();
@@ -190,7 +188,7 @@ namespace HT.Framework.XLua
             if (asset)
             {
                 string code = asset.text;
-                File.AppendAllText(filePath, code);
+                File.AppendAllText(filePath, code, Encoding.UTF8);
                 asset = null;
                 AssetDatabase.Refresh();
             }

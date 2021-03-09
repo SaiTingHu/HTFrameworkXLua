@@ -1,5 +1,6 @@
 ﻿using CSObjectWrapEditor;
 using System.IO;
+using System.Text;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -107,7 +108,7 @@ namespace HT.Framework.XLua
                     {
                         string code = asset.text;
                         code = code.Replace("#MODULENAME#", className);
-                        File.AppendAllText(path, code);
+                        File.AppendAllText(path, code, Encoding.UTF8);
                         asset = null;
                         AssetDatabase.Refresh();
 

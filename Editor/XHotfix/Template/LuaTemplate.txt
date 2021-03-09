@@ -1,4 +1,4 @@
-#MODULENAME# = {}
+﻿#MODULENAME# = {}
 
 function #MODULENAME#.OnInitialization()
 	print("Lua #MODULENAME#.OnInitialization...")

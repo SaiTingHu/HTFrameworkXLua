@@ -17,11 +17,11 @@ namespace HT.Framework.XLua
         private Vector2 _scrollScript;
 
         #region Keyword
-        private readonly string _local = "local";
-        private readonly string _function = "function";
-        private readonly string _if = "if";
-        private readonly string _for = "for";
-        private readonly string _while = "while";
+        private readonly string _local = "local ";
+        private readonly string _function = "function ";
+        private readonly string _if = "if ";
+        private readonly string _for = "for ";
+        private readonly string _while = "while ";
         private readonly string _end = "end";
         private readonly string _noteStart = "--[[";
         private readonly string _noteEnd = "--]]";
@@ -35,7 +35,6 @@ namespace HT.Framework.XLua
                 return false;
             }
         }
-
         protected override bool IsEnableBaseInspectorGUI
         {
             get
@@ -55,7 +54,6 @@ namespace HT.Framework.XLua
                 OnLuaExplain();
             }
         }
-
         protected override void OnInspectorDefaultGUI()
         {
             base.OnInspectorDefaultGUI();
@@ -74,7 +72,6 @@ namespace HT.Framework.XLua
                 }
             }
         }
-
         protected override void OnHeaderGUI()
         {
             base.OnHeaderGUI();
@@ -85,6 +82,9 @@ namespace HT.Framework.XLua
             }
         }
 
+        /// <summary>
+        /// 解析Lua脚本
+        /// </summary>
         private void OnLuaExplain()
         {
             _variables = new List<LuaVariable>();
@@ -95,7 +95,10 @@ namespace HT.Framework.XLua
             for (int i = 0; i < codes.Length; i++)
             {
                 codes[i] = codes[i].Trim();
-                if (string.IsNullOrEmpty(codes[i]) || codes[i] == "")
+            }
+            for (int i = 0; i < codes.Length; i++)
+            {
+                if (string.IsNullOrEmpty(codes[i]))
                 {
                     continue;
                 }
@@ -103,23 +106,16 @@ namespace HT.Framework.XLua
                 //多行注释
                 if (codes[i].StartsWith(_noteStart))
                 {
-                    if (codes[i].EndsWith(_noteEnd))
+                    int j = i;
+                    for (; j < codes.Length; j++)
                     {
-                        continue;
-                    }
-                    else
-                    {
-                        int j = i + 1;
-                        for (; j < codes.Length; j++)
+                        if (codes[j].EndsWith(_noteEnd))
                         {
-                            if (codes[j].EndsWith(_noteEnd))
-                            {
-                                break;
-                            }
+                            break;
                         }
-                        i = j;
-                        continue;
                     }
+                    i = j;
+                    continue;
                 }
 
                 //单行注释
@@ -145,8 +141,7 @@ namespace HT.Framework.XLua
                     int j = i + 1;
                     for (; j < codes.Length; j++)
                     {
-                        codes[j] = codes[j].Trim();
-                        if (string.IsNullOrEmpty(codes[j]) || codes[j] == "")
+                        if (string.IsNullOrEmpty(codes[j]))
                         {
                             continue;
                         }
@@ -189,16 +184,18 @@ namespace HT.Framework.XLua
                         for (int j = 0; j < keys.Length; j++)
                         {
                             LuaVariable variable = new LuaVariable();
-                            variable.Name = keys[j];
+                            variable.Name = keys[j].Trim();
                             if (isLocal) variable.Name = "local " + variable.Name;
-                            variable.Value = j < values.Length ? values[j] : "nil";
+                            variable.Value = j < values.Length ? values[j].Trim() : "nil";
                             _variables.Add(variable);
                         }
                     }
                 }
             }
         }
-
+        /// <summary>
+        /// 标题GUI
+        /// </summary>
         private void OnTitleGUI()
         {
             GUI.enabled = true;
@@ -216,7 +213,9 @@ namespace HT.Framework.XLua
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
         }
-
+        /// <summary>
+        /// 解析GUI
+        /// </summary>
         private void OnParserGUI()
         {
             GUILayout.BeginVertical();
@@ -279,7 +278,9 @@ namespace HT.Framework.XLua
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
         }
-
+        /// <summary>
+        /// 脚本GUI
+        /// </summary>
         private void OnScriptGUI()
         {
             GUILayout.BeginVertical(EditorGlobalTools.Styles.Box);
@@ -293,18 +294,22 @@ namespace HT.Framework.XLua
             GUILayout.EndVertical();
         }
 
+        /// <summary>
+        /// Lua变量
+        /// </summary>
         private class LuaVariable
         {
             public string Name;
             public string Value;
         }
-
+        /// <summary>
+        /// Lua方法
+        /// </summary>
         private class LuaFunction
         {
             public string Name;
             public string Body;
         }
-
         private enum LuaShowType
         {
             Parser,
