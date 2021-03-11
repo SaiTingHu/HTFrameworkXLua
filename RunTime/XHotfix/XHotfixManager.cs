@@ -101,7 +101,7 @@ namespace HT.Framework.XLua
             }
             else
             {
-                _timer = 0;
+                _timer -= 1;
                 _luaOnRefreshSecond?.Invoke();
             }
 
