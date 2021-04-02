@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace HT.Framework.XLua
@@ -9,25 +6,12 @@ namespace HT.Framework.XLua
     [CustomEditor(typeof(TextAsset))]
     internal sealed class LuaInspector : HTFEditor<TextAsset>
     {
-        private bool _isLuaScript = false;
-        private List<LuaVariable> _variables;
-        private List<LuaFunction> _functions;
+        private bool _isLuaScript;
+        private LuaParser _luaParser;
         private LuaShowType _showType = LuaShowType.Parser;
         private Vector2 _scrollExplain;
         private Vector2 _scrollScript;
-
-        #region Keyword
-        private readonly string _local = "local ";
-        private readonly string _function = "function ";
-        private readonly string _if = "if ";
-        private readonly string _for = "for ";
-        private readonly string _while = "while ";
-        private readonly string _end = "end";
-        private readonly string _noteStart = "--[[";
-        private readonly string _noteEnd = "--]]";
-        private readonly string _note = "--";
-        #endregion
-
+        
         protected override bool IsEnableRuntimeData
         {
             get
@@ -51,7 +35,7 @@ namespace HT.Framework.XLua
 
             if (_isLuaScript)
             {
-                OnLuaExplain();
+                _luaParser = new LuaParser(Target.text);
             }
         }
         protected override void OnInspectorDefaultGUI()
@@ -81,118 +65,7 @@ namespace HT.Framework.XLua
                 GUI.Label(new Rect(45, 25, 65, 20), "Lua Script", "AssetLabel");
             }
         }
-
-        /// <summary>
-        /// 解析Lua脚本
-        /// </summary>
-        private void OnLuaExplain()
-        {
-            _variables = new List<LuaVariable>();
-            _functions = new List<LuaFunction>();
-            StringBuilder builder = new StringBuilder();
-            
-            string[] codes = Target.text.Split(Environment.NewLine.ToCharArray());
-            for (int i = 0; i < codes.Length; i++)
-            {
-                codes[i] = codes[i].Trim();
-            }
-            for (int i = 0; i < codes.Length; i++)
-            {
-                if (string.IsNullOrEmpty(codes[i]))
-                {
-                    continue;
-                }
-                
-                //多行注释
-                if (codes[i].StartsWith(_noteStart))
-                {
-                    int j = i;
-                    for (; j < codes.Length; j++)
-                    {
-                        if (codes[j].EndsWith(_noteEnd))
-                        {
-                            break;
-                        }
-                    }
-                    i = j;
-                    continue;
-                }
-
-                //单行注释
-                if (codes[i].StartsWith(_note))
-                {
-                    continue;
-                }
-
-                //标记局部
-                bool isLocal = codes[i].StartsWith(_local);
-                if (isLocal) codes[i] = codes[i].Remove(0, 5).TrimStart();
-
-                //标记方法
-                bool isFunction = codes[i].StartsWith(_function);
-                if (isFunction)
-                {
-                    codes[i] = codes[i].Remove(0, 8).TrimStart();
-                    LuaFunction function = new LuaFunction();
-                    function.Name = codes[i];
-                    if (isLocal) function.Name = "local " + function.Name;
-                    int endCount = 0;
-                    builder.Clear();
-                    int j = i + 1;
-                    for (; j < codes.Length; j++)
-                    {
-                        if (string.IsNullOrEmpty(codes[j]))
-                        {
-                            continue;
-                        }
-
-                        if (codes[j].StartsWith(_end))
-                        {
-                            if (endCount > 0)
-                            {
-                                endCount -= 1;
-                                builder.Append(codes[j]);
-                                builder.Append(Environment.NewLine);
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            if (codes[j].StartsWith(_if) || codes[j].StartsWith(_for) || codes[j].StartsWith(_while))
-                            {
-                                endCount += 1;
-                            }
-                            builder.Append(codes[j]);
-                            builder.Append(Environment.NewLine);
-                        }
-                    }
-                    i = j;
-                    function.Body = builder.ToString().Trim();
-                    _functions.Add(function);
-                }
-                //标记变量
-                else
-                {
-                    string[] keyValue = codes[i].Split('=');
-                    if (keyValue.Length == 2)
-                    {
-                        string[] keys = keyValue[0].Split(',');
-                        string[] values = keyValue[1].Split(',');
-                        for (int j = 0; j < keys.Length; j++)
-                        {
-                            LuaVariable variable = new LuaVariable();
-                            variable.Name = keys[j].Trim();
-                            if (isLocal) variable.Name = "local " + variable.Name;
-                            variable.Value = j < values.Length ? values[j].Trim() : "nil";
-                            _variables.Add(variable);
-                        }
-                    }
-                }
-            }
-        }
+        
         /// <summary>
         /// 标题GUI
         /// </summary>
@@ -221,59 +94,7 @@ namespace HT.Framework.XLua
             GUILayout.BeginVertical();
             _scrollExplain = GUILayout.BeginScrollView(_scrollExplain);
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Variables", EditorStyles.boldLabel);
-            GUILayout.FlexibleSpace();
-            GUI.enabled = false;
-            if (GUILayout.Button("+", "MiniButtonLeft"))
-            {
-
-            }
-            if (GUILayout.Button("-", "MiniButtonRight"))
-            {
-
-            }
-            GUI.enabled = true;
-            GUILayout.EndHorizontal();
-
-            for (int i = 0; i < _variables.Count; i++)
-            {
-                GUILayout.BeginHorizontal();
-                EditorGUILayout.TextField(_variables[i].Name, _variables[i].Value);
-                GUILayout.EndHorizontal();
-            }
-
-            GUILayout.Space(20);
-            
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Functions", EditorStyles.boldLabel);
-            GUILayout.FlexibleSpace();
-            GUI.enabled = false;
-            if (GUILayout.Button("+", "MiniButtonLeft"))
-            {
-
-            }
-            if (GUILayout.Button("-", "MiniButtonRight"))
-            {
-
-            }
-            GUI.enabled = true;
-            GUILayout.EndHorizontal();
-
-            for (int i = 0; i < _functions.Count; i++)
-            {
-                GUILayout.BeginVertical(EditorGlobalTools.Styles.Box);
-
-                GUILayout.BeginHorizontal();
-                GUILayout.Label(_functions[i].Name);
-                GUILayout.EndHorizontal();
-
-                GUILayout.BeginHorizontal();
-                EditorGUILayout.TextArea(_functions[i].Body);
-                GUILayout.EndHorizontal();
-
-                GUILayout.EndVertical();
-            }
+            _luaParser.Document.OnGUI();
 
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
@@ -293,23 +114,7 @@ namespace HT.Framework.XLua
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
         }
-
-        /// <summary>
-        /// Lua变量
-        /// </summary>
-        private class LuaVariable
-        {
-            public string Name;
-            public string Value;
-        }
-        /// <summary>
-        /// Lua方法
-        /// </summary>
-        private class LuaFunction
-        {
-            public string Name;
-            public string Body;
-        }
+        
         private enum LuaShowType
         {
             Parser,
