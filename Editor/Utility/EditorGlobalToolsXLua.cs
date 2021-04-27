@@ -21,28 +21,28 @@ namespace HT.Framework.XLua
         [MenuItem("XLua/Import XLua Tools")]
         private static void ImportXLuaTools()
         {
-            string path = GlobalTools.GetDirectorySameLevelOfAssets("/Tools");
+            string path = PathToolkit.ProjectPath + "Tools";
             if (Directory.Exists(path))
             {
                 Log.Warning("已存在 XLua Tools：" + path);
                 return;
             }
 
-            ZipFile.DeCompress(Application.dataPath + "/HTFrameworkXLua/Editor/XLua/Tools.zip", GlobalTools.GetDirectorySameLevelOfAssets(""), "", true);
+            ZipFile.DeCompress(PathToolkit.ProjectPath + "Assets/HTFrameworkXLua/Editor/XLua/Tools.zip", PathToolkit.ProjectPath, "", true);
             Log.Info("已成功导入 XLua Tools：" + path);
         }
 
         [MenuItem("XLua/Import XLua WebGLPlugins")]
         private static void ImportXLuaWebGLPlugins()
         {
-            string path = GlobalTools.GetDirectorySameLevelOfAssets("/WebGLPlugins");
+            string path = PathToolkit.ProjectPath + "WebGLPlugins";
             if (Directory.Exists(path))
             {
                 Log.Warning("已存在 XLua WebGLPlugins：" + path);
                 return;
             }
 
-            ZipFile.DeCompress(Application.dataPath + "/HTFrameworkXLua/Editor/XLua/WebGLPlugins.zip", GlobalTools.GetDirectorySameLevelOfAssets(""), "", true);
+            ZipFile.DeCompress(PathToolkit.ProjectPath + "Assets/HTFrameworkXLua/Editor/XLua/WebGLPlugins.zip", PathToolkit.ProjectPath, "", true);
             Log.Info("已成功导入 XLua WebGLPlugins：" + path);
         }
         #endregion
