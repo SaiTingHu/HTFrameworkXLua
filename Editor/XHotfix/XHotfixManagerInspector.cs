@@ -58,7 +58,7 @@ namespace HT.Framework.XLua
 
             #region XHotfixProperty
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Loader Type", GUILayout.Width(100));
+            GUILayout.Label("Loader Type", GUILayout.Width(LabelWidth));
             if (GUILayout.Button(Target.XHotfixLoaderType, EditorGlobalTools.Styles.MiniPopup))
             {
                 GenericMenu gm = new GenericMenu();
@@ -81,13 +81,11 @@ namespace HT.Framework.XLua
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Auto StartUp", GUILayout.Width(100));
-            Toggle(Target.IsAutoStartUp, out Target.IsAutoStartUp, "");
+            Toggle(Target.IsAutoStartUp, out Target.IsAutoStartUp, "Auto StartUp");
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Tick Interval", GUILayout.Width(100));
-            FloatField(Target.TickInterval, out Target.TickInterval, "");
+            FloatField(Target.TickInterval, out Target.TickInterval, "Tick Interval");
             GUILayout.EndHorizontal();
             #endregion
             
