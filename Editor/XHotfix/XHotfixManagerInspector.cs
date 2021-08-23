@@ -59,7 +59,7 @@ namespace HT.Framework.XLua
             #region XHotfixProperty
             GUILayout.BeginHorizontal();
             GUILayout.Label("Loader Type", GUILayout.Width(LabelWidth));
-            if (GUILayout.Button(Target.XHotfixLoaderType, EditorGlobalTools.Styles.MiniPopup))
+            if (GUILayout.Button(Target.XHotfixLoaderType, EditorGlobalTools.Styles.MiniPopup, GUILayout.Width(EditorGUIUtility.currentViewWidth - LabelWidth - 25)))
             {
                 GenericMenu gm = new GenericMenu();
                 List<Type> types = ReflectionToolkit.GetTypesInRunTimeAssemblies(type =>
@@ -80,13 +80,8 @@ namespace HT.Framework.XLua
             }
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            Toggle(Target.IsAutoStartUp, out Target.IsAutoStartUp, "Auto StartUp");
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            FloatField(Target.TickInterval, out Target.TickInterval, "Tick Interval");
-            GUILayout.EndHorizontal();
+            PropertyField(nameof(XHotfixManager.IsAutoStartUp), "Auto StartUp");
+            PropertyField(nameof(XHotfixManager.TickInterval), "Tick Interval");
             #endregion
             
             GUILayout.Space(10);
@@ -97,7 +92,7 @@ namespace HT.Framework.XLua
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            TextField(Target.HotfixCodeAssetBundleName, out Target.HotfixCodeAssetBundleName, "");
+            PropertyField(nameof(XHotfixManager.HotfixCodeAssetBundleName), "", false);
             GUI.enabled = _hotfixIsCreated;
             if (GUILayout.Button("Mark All", EditorStyles.miniButton, GUILayout.Width(60)))
             {
@@ -110,17 +105,13 @@ namespace HT.Framework.XLua
             GUILayout.Label("XHotfixCode AssetsPath");
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            TextField(Target.HotfixCodeAssetsPath, out Target.HotfixCodeAssetsPath, "");
-            GUILayout.EndHorizontal();
-
+            PropertyField(nameof(XHotfixManager.HotfixCodeAssetsPath), "");
+            
             GUILayout.BeginHorizontal();
             GUILayout.Label("XHotfixCode Main");
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            TextField(Target.HotfixCodeMain, out Target.HotfixCodeMain, "");
-            GUILayout.EndHorizontal();
+            PropertyField(nameof(XHotfixManager.HotfixCodeMain), "");
             #endregion
 
             GUILayout.EndVertical();
