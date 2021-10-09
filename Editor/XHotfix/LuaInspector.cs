@@ -62,7 +62,7 @@ namespace HT.Framework.XLua
 
             if (_isLuaScript)
             {
-                GUI.Label(new Rect(45, 25, 65, 20), "Lua Script", "AssetLabel");
+                GUI.Label(new Rect(100, 25, 65, 20), "Lua Script", "AssetLabel");
             }
         }
         
