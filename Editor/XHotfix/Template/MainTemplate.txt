@@ -4,22 +4,22 @@ Main = CS.HT.Framework.Main
 GameObject = CS.UnityEngine.GameObject
 Transform = CS.UnityEngine.Transform
 
-function OnInitialization()
-	print("Lua OnInitialization...")
+function OnInit()
+	print("Lua OnInit...")
 end
 
-function OnPreparatory()
-	print("Lua OnPreparatory...")
+function OnReady()
+	print("Lua OnReady...")
 end
 
-function OnRefresh()
-	print("Lua OnRefresh...")
+function OnUpdate()
+	print("Lua OnUpdate...")
 end
 
-function OnRefreshSecond()
-	print("Lua OnRefreshSecond...")
+function OnUpdateSecond()
+	print("Lua OnUpdateSecond...")
 end
 
-function OnTermination()
-    print("Lua OnTermination...")
+function OnTerminate()
+    print("Lua OnTerminate...")
 end

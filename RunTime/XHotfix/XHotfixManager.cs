@@ -42,11 +42,11 @@ namespace HT.Framework.XLua
         private XHotfixLoaderBase _loader;
         private LuaEnv _luaEnv;
         private LuaTable _luaTable;
-        private Action _luaOnInitialization;
-        private Action _luaOnPreparatory;
-        private Action _luaOnRefresh;
-        private Action _luaOnRefreshSecond;
-        private Action _luaOnTermination;
+        private Action _luaOnInit;
+        private Action _luaOnReady;
+        private Action _luaOnUpdate;
+        private Action _luaOnUpdateSecond;
+        private Action _luaOnTerminate;
 
         protected override void Awake()
         {
@@ -93,7 +93,7 @@ namespace HT.Framework.XLua
         }
         private void Update()
         {
-            _luaOnRefresh?.Invoke();
+            _luaOnUpdate?.Invoke();
 
             if (_timer < 1)
             {
@@ -102,7 +102,7 @@ namespace HT.Framework.XLua
             else
             {
                 _timer -= 1;
-                _luaOnRefreshSecond?.Invoke();
+                _luaOnUpdateSecond?.Invoke();
             }
 
             if (Time.time - _lastGCTime > TickInterval)
@@ -115,13 +115,13 @@ namespace HT.Framework.XLua
         {
             base.OnDestroy();
 
-            _luaOnTermination?.Invoke();
+            _luaOnTerminate?.Invoke();
 
-            _luaOnInitialization = null;
-            _luaOnPreparatory = null;
-            _luaOnRefresh = null;
-            _luaOnRefreshSecond = null;
-            _luaOnTermination = null;
+            _luaOnInit = null;
+            _luaOnReady = null;
+            _luaOnUpdate = null;
+            _luaOnUpdateSecond = null;
+            _luaOnTerminate = null;
 
             _loader.Dispose();
             _loader = null;
@@ -227,14 +227,14 @@ namespace HT.Framework.XLua
         {
             _luaEnv.DoString("require '" + HotfixCodeMain + "'", HotfixCodeMain, _luaTable);
             
-            _luaOnInitialization = LuaGlobal.Get<Action>("OnInitialization");
-            _luaOnPreparatory = LuaGlobal.Get<Action>("OnPreparatory");
-            _luaOnRefresh = LuaGlobal.Get<Action>("OnRefresh");
-            _luaOnRefreshSecond = LuaGlobal.Get<Action>("OnRefreshSecond");
-            _luaOnTermination = LuaGlobal.Get<Action>("OnTermination");
+            _luaOnInit = LuaGlobal.Get<Action>("OnInit");
+            _luaOnReady = LuaGlobal.Get<Action>("OnReady");
+            _luaOnUpdate = LuaGlobal.Get<Action>("OnUpdate");
+            _luaOnUpdateSecond = LuaGlobal.Get<Action>("OnUpdateSecond");
+            _luaOnTerminate = LuaGlobal.Get<Action>("OnTerminate");
 
-            _luaOnInitialization?.Invoke();
-            _luaOnPreparatory?.Invoke();
+            _luaOnInit?.Invoke();
+            _luaOnReady?.Invoke();
 
             IsRuning = true;
         }

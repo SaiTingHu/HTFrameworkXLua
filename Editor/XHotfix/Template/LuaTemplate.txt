@@ -1,23 +1,23 @@
 ﻿#MODULENAME# = {}
 
-function #MODULENAME#.OnInitialization()
-	print("Lua #MODULENAME#.OnInitialization...")
+function #MODULENAME#.OnInit()
+	print("Lua #MODULENAME#.OnInit...")
 end
 
-function #MODULENAME#.OnPreparatory()
-	print("Lua #MODULENAME#.OnPreparatory...")
+function #MODULENAME#.OnReady()
+	print("Lua #MODULENAME#.OnReady...")
 end
 
-function #MODULENAME#.OnRefresh()
-	print("Lua #MODULENAME#.OnRefresh...")
+function #MODULENAME#.OnUpdate()
+	print("Lua #MODULENAME#.OnUpdate...")
 end
 
-function #MODULENAME#.OnRefreshSecond()
-	print("Lua #MODULENAME#.OnRefreshSecond...")
+function #MODULENAME#.OnUpdateSecond()
+	print("Lua #MODULENAME#.OnUpdateSecond...")
 end
 
-function #MODULENAME#.OnTermination()
-    print("Lua #MODULENAME#.OnTermination...")
+function #MODULENAME#.OnTerminate()
+    print("Lua #MODULENAME#.OnTerminate...")
 end
 
 return #MODULENAME#
