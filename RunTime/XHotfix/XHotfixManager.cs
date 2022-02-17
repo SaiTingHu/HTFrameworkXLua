@@ -7,6 +7,7 @@ namespace HT.Framework.XLua
     /// <summary>
     /// XLua热更新模块管理者
     /// </summary>
+    [LockTransform]
     [DisallowMultipleComponent]
     [DefaultExecutionOrder(-10)]
     public sealed class XHotfixManager : SingletonBehaviourBase<XHotfixManager>
