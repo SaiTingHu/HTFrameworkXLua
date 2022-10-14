@@ -8,7 +8,7 @@ using UnityEngine;
 namespace HT.Framework.XLua
 {
     /// <summary>
-    /// HT.Framework.XLua编辑器全局工具
+    /// XLua编辑器全局工具
     /// </summary>
     public static class EditorGlobalToolsXLua
     {
@@ -47,11 +47,11 @@ namespace HT.Framework.XLua
         }
         #endregion
 
-        #region 层级视图新建菜单
+        #region 层级视图新建菜单 【优先级500】
         /// <summary>
         /// 【验证函数】新建XLua主环境
         /// </summary>
-        [MenuItem("GameObject/HTFramework XLua/XLua Environment", true)]
+        [MenuItem("GameObject/HTFramework/★ XLua/XLua Environment", true)]
         private static bool CreateXLuaValidate()
         {
             return Object.FindObjectOfType<XHotfixManager>() == null;
@@ -59,7 +59,7 @@ namespace HT.Framework.XLua
         /// <summary>
         /// 新建XLua主环境
         /// </summary>
-        [MenuItem("GameObject/HTFramework XLua/XLua Environment", false, 0)]
+        [MenuItem("GameObject/HTFramework/★ XLua/XLua Environment", false, 500)]
         private static void CreateXLua()
         {
             Object asset = AssetDatabase.LoadAssetAtPath<Object>("Assets/HTFrameworkXLua/HTFrameworkXLua.prefab");
@@ -82,11 +82,11 @@ namespace HT.Framework.XLua
         }
         #endregion
 
-        #region 工程视图新建菜单
+        #region 工程视图新建菜单 【优先级500】
         /// <summary>
         /// 【验证函数】新建XHotfix的Lua脚本
         /// </summary>
-        [MenuItem("Assets/Create/HTFramework XLua/[XHotfix] Lua Script", true)]
+        [MenuItem("Assets/Create/HTFramework/★ XLua/[XHotfix] Lua Script", true)]
         private static bool CreateXHotfixLuaValidate()
         {
             return AssetDatabase.IsValidFolder("Assets/XHotfix");
@@ -95,7 +95,7 @@ namespace HT.Framework.XLua
         /// <summary>
         /// 新建XHotfix的Lua脚本
         /// </summary>
-        [MenuItem("Assets/Create/HTFramework XLua/[XHotfix] Lua Script", false, 0)]
+        [MenuItem("Assets/Create/HTFramework/★ XLua/[XHotfix] Lua Script", false, 500)]
         private static void CreateXHotfixLua()
         {
             string path = EditorUtility.SaveFilePanel("新建 Lua 类", Application.dataPath + "/XHotfix", "NewLua", "lua");
