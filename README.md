@@ -4,9 +4,9 @@
 
 ## 环境
 
-- Unity版本：2019.4.30。
+- Unity版本：2021.3.15。
 
-- .NET API版本：4.x。
+- .NET API版本：.NET Framework。
 
 - [XLua V2.1.14](https://github.com/Tencent/xLua)。
 
