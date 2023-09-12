@@ -10,7 +10,7 @@ namespace HT.Framework.XLua
     [LockTransform]
     [DisallowMultipleComponent]
     [DefaultExecutionOrder(-10)]
-    public sealed class XHotfixManager : SingletonBehaviourBase<XHotfixManager>
+    public sealed class XHotfixManager : SingletonBehaviourBase<XHotfixManager>, IUpdateFrame
     {
         /// <summary>
         /// 当前的XLua加载器类型
@@ -92,7 +92,7 @@ namespace HT.Framework.XLua
                 StartUp();
             }
         }
-        private void Update()
+        public void OnUpdateFrame()
         {
             _luaOnUpdate?.Invoke();
 
